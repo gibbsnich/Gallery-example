@@ -1,18 +1,33 @@
 package com.enrico.gallery.galleryapp.albums;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
+import com.enrico.gallery.galleryapp.MediaActivity;
 import com.enrico.gallery.galleryapp.settings.Preferences;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import io.github.luizgrp.sectionedrecyclerviewadapter.SectionedRecyclerViewAdapter;
@@ -128,6 +143,59 @@ public class AlbumsUtils {
         File folderName = new File(path);
 
         return folderName.getName();
+
+    }
+
+    static BitmapDescriptor resizeMapIcons(final Activity activity, String imgPath, int width, int height){
+        Bitmap imageBitmap = BitmapFactory.decodeFile(imgPath);
+        //Bitmap imageBitmap = BitmapFactory.decodeResource(activity.getResources(),
+        //        activity.getResources().getIdentifier(iconName, "drawable", activity.getPackageName()));
+        Bitmap resizedBitmap = Bitmap.createScaledBitmap(imageBitmap, width, height, false);
+        return BitmapDescriptorFactory.fromBitmap(resizedBitmap);
+    }
+
+    private static String[] imgPaths;
+    private static Map<Marker,Integer> markerPos;
+
+    static void setupAlbums(final Activity activity, String[] veryPaths, GoogleMap googleMap) {
+        imgPaths = veryPaths;
+        markerPos = new HashMap<Marker,Integer>();
+        LatLng ll = null;
+        for (int i = 0; i < veryPaths.length; i++) {
+            String mPath = veryPaths[i];
+            ExifInterface exif = null;
+            try {
+                exif = new ExifInterface(mPath);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            float[] latLong = new float[2];
+            boolean hasLatLong = exif.getLatLong(latLong);
+            if (hasLatLong) {
+                System.out.println("Latitude: " + latLong[0]);
+                System.out.println("Longitude: " + latLong[1]);
+
+                ll = new LatLng(latLong[0], latLong[1]);
+
+                Marker m = googleMap.addMarker(new MarkerOptions()
+                        .position(ll)
+                        .icon(resizeMapIcons(activity, mPath, 100, 100)));
+                markerPos.put(m, i);
+            }
+        }
+        if (ll != null)
+            googleMap.moveCamera(CameraUpdateFactory.newLatLng(ll));
+    }
+
+    public static void launchMediaActivity(final Activity activity, final Marker marker) {
+
+        Intent intent = new Intent(activity,
+                MediaActivity.class);
+
+        intent.putExtra("urls", imgPaths);
+        intent.putExtra("pos", markerPos.get(marker));
+
+        activity.startActivity(intent);
 
     }
 

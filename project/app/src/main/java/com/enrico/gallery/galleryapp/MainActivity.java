@@ -19,15 +19,26 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.enrico.gallery.galleryapp.albums.AlbumsUtils;
 import com.enrico.gallery.galleryapp.albums.AsyncLoadGallery;
+import com.enrico.gallery.galleryapp.albums.AsyncLoadMapGallery;
 import com.enrico.gallery.galleryapp.settings.Preferences;
 import com.enrico.gallery.galleryapp.settings.SettingsActivity;
 import com.enrico.gallery.galleryapp.utils.PermissionUtils;
 import com.enrico.gallery.galleryapp.utils.SDCardUtils;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.List;
 
 import io.github.luizgrp.sectionedrecyclerviewadapter.SectionedRecyclerViewAdapter;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     public static Intent starterIntent;
     FloatingActionButton fabPhotos, fabVideos, fabPlus;
@@ -36,8 +47,8 @@ public class MainActivity extends AppCompatActivity {
     ContextThemeWrapper contextThemeWrapper;
     View clickedFab;
 
-    RecyclerView recyclerView;
-    SectionedRecyclerViewAdapter sectionedRecyclerViewAdapter;
+    //RecyclerView recyclerView;
+    //SectionedRecyclerViewAdapter sectionedRecyclerViewAdapter;
     Toolbar toolbar;
 
     private AnimatedVectorDrawableCompat plusToMinus, minusToPlus;
@@ -94,22 +105,10 @@ public class MainActivity extends AppCompatActivity {
 
         initViews();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    PermissionUtils.askReadWriteAccess(MainActivity.this);
-
-                }
-            });
-
-        } else {
-
-            AsyncLoadGallery.execute(this, recyclerView, sectionedRecyclerViewAdapter);
-
-        }
-
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
     }
 
     private void initViews() {
@@ -125,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
 
         plusToMinus = AnimatedVectorDrawableCompat.create(MainActivity.this, R.drawable.avd_pathmorph_plusminus_plus_to_minus);
         minusToPlus = AnimatedVectorDrawableCompat.create(MainActivity.this, R.drawable.avd_pathmorph_plusminus_minus_to_plus);
-
+/*
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
 
         sectionedRecyclerViewAdapter = new SectionedRecyclerViewAdapter();
@@ -155,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
+*/
         initClicks();
     }
 
@@ -268,6 +267,7 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
         switch (requestCode) {
+            /*
             case 0: {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
@@ -280,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             break;
-
+*/
             case 1: {
                 if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
 
@@ -311,6 +311,59 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
         }
+    }
+
+    private GoogleMap mMap;
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+
+                AlbumsUtils.launchMediaActivity(MainActivity.this, marker);
+                return false;
+            }
+        });
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    PermissionUtils.askReadWriteAccess(MainActivity.this);
+                }
+
+            }
+        });
+
+
+
+        AsyncLoadMapGallery.execute(MainActivity.this, mMap);
+
+        /*
+        // Add a marker in Sydney and move the camera
+        //LatLng sydney = new LatLng(-34, 151);
+        //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+        //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    PermissionUtils.askReadWriteAccess(MainActivity.this);
+
+                }
+            });
+
+        } else {
+
+            //AsyncLoadGallery.execute(this, recyclerView, sectionedRecyclerViewAdapter);
+            AsyncLoadMapGallery.execute(this, mMap);
+        }
+*/
     }
 }
 
