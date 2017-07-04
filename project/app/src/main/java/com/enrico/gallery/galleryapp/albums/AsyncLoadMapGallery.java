@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
 import android.os.AsyncTask;
+import android.util.DisplayMetrics;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
@@ -77,6 +78,8 @@ public class AsyncLoadMapGallery {
         private String[] resultFolders;
         private String[] resultFiles;
 
+        private float density;
+
         private populateGallery(Activity activity, GoogleMap googleMap, ProgressBar progressBar) {
             this.activity = activity;
             this.googleMap = googleMap;
@@ -85,7 +88,12 @@ public class AsyncLoadMapGallery {
 
         protected void onPreExecute() {
             markerPos = new HashMap<>();
+            DisplayMetrics metrics = new DisplayMetrics();
+            activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+            density = metrics.density;
         }
+
+        private final static int DEFAULT_IMG_SIZE = 800;
 
         @Override
         protected Void doInBackground(Void... params) {
@@ -104,6 +112,7 @@ public class AsyncLoadMapGallery {
                 galleryDB = activity.openOrCreateDatabase("GALLERY", MODE_PRIVATE, null);
                 galleryDB.execSQL("CREATE TABLE IF NOT EXISTS galleryCache (id INTEGER PRIMARY KEY AUTOINCREMENT,filehash varchar, lat double, lng double);");
                 File imgCacheDir = activity.getCacheDir();
+                StringBuilder md5Collector = new StringBuilder();
                 for (int i = 0; i < resultFiles.length; i++) {
                     String mediaPath = resultFiles[i];
 
@@ -139,7 +148,21 @@ public class AsyncLoadMapGallery {
                         } else {
                             Bitmap imageBitmap = BitmapFactory.decodeFile(mediaPath);
                             if (imageBitmap != null) {
-                                Bitmap resizedBitmap = Bitmap.createScaledBitmap(imageBitmap, 200, 200, false);
+                                int w = imageBitmap.getWidth(),
+                                    h = imageBitmap.getHeight(),
+                                    targetWidth, targetHeight;
+
+                                if (w >= h) {
+                                    h = (int)(DEFAULT_IMG_SIZE*((float)h/w));
+                                    targetWidth = (int)(DEFAULT_IMG_SIZE / density);
+                                    targetHeight = (int)(h / density);
+                                } else {
+                                    w = (int)(DEFAULT_IMG_SIZE*((float)w/h));
+                                    targetWidth = (int)(w / density);
+                                    targetHeight = (int)(DEFAULT_IMG_SIZE / density);
+                                }
+
+                                Bitmap resizedBitmap = Bitmap.createScaledBitmap(imageBitmap, targetWidth, targetHeight, false);
                                 if (resizedBitmap != null) {
                                     FileOutputStream cacheImageStream = null;
                                     try {
@@ -162,10 +185,33 @@ public class AsyncLoadMapGallery {
                                 }
                             }
                         }
+                        md5Collector.append("'");
+                        md5Collector.append(md5);
+                        md5Collector.append("', ");
                         //todo care about aspect ratio
                         publishProgress(new GalleryValues(ll, mapIcon, i, resultFiles.length));
                     }
                 }
+                String usedMd5 = md5Collector.toString();
+                if (usedMd5.length() > 2)
+                    usedMd5 = usedMd5.substring(0, usedMd5.length() - 2);
+                else
+                    usedMd5 = "";
+
+                Cursor cursor = galleryDB.rawQuery("SELECT filehash FROM galleryCache where filehash not in (" + usedMd5 + ");", null);
+                if (cursor != null && cursor.moveToFirst()) {
+                    while (!cursor.isAfterLast()) {
+                        String unusedMd5 = cursor.getString(cursor.getColumnIndex("filehash"));
+                        File unusedFile = new File(imgCacheDir, unusedMd5 + ".png");
+                        if (!unusedFile.delete()) {
+                           // throw new IOException("Cannot delete " + unusedFile);
+                        }
+                        cursor.moveToNext();
+                    }
+                    cursor.close();
+                }
+
+                galleryDB.execSQL("delete from galleryCache where filehash not in ("+ usedMd5 +");");
             } finally {
                 if (galleryDB != null)
                     galleryDB.close();
