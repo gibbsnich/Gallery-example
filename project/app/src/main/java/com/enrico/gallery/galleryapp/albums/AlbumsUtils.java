@@ -136,20 +136,20 @@ public class AlbumsUtils {
     }
 
     private static String[] imgPaths;
-    private static Map<Marker,Integer> markerPos;
+    private static Map<AsyncLoadMapGallery.GalleryItem,Integer> markerPos;
 
-    static void setupAlbums(String[] paths, Map<Marker,Integer> markers) {
+    static void setupAlbums(String[] paths, Map<AsyncLoadMapGallery.GalleryItem,Integer> markers) {
         imgPaths = paths;
         markerPos = markers;
     }
 
-    public static void launchMediaActivity(final Activity activity, final Marker marker) {
+    public static void launchMediaActivity(final Activity activity, final AsyncLoadMapGallery.GalleryItem galleryItem) {
 
         Intent intent = new Intent(activity,
                 MediaActivity.class);
 
         intent.putExtra("urls", imgPaths);
-        intent.putExtra("pos", markerPos.get(marker));
+        intent.putExtra("pos", markerPos.get(galleryItem));
 
         activity.startActivity(intent);
 

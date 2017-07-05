@@ -310,13 +310,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(Marker marker) {
-                AlbumsUtils.launchMediaActivity(MainActivity.this, marker);
-                return false;
-            }
-        });
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
