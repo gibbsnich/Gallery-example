@@ -13,15 +13,12 @@ import android.media.ExifInterface;
 import android.os.AsyncTask;
 import android.util.DisplayMetrics;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import com.enrico.gallery.galleryapp.utils.MD5;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterItem;
@@ -47,7 +44,7 @@ public class AsyncLoadMapGallery {
         new populateGallery(activity, googleMap, progressBar).execute();
     }
 
-    public static class GalleryItem implements ClusterItem  {
+    private static class GalleryItem implements ClusterItem  {
         LatLng latLng;
         Bitmap bitmap;
         int cur, max;
@@ -77,7 +74,7 @@ public class AsyncLoadMapGallery {
     }
 
     private static class GalleryItemRenderer extends DefaultClusterRenderer<GalleryItem> {
-        public GalleryItemRenderer(Context context, GoogleMap map, ClusterManager<GalleryItem> clusterManager) {
+        GalleryItemRenderer(Context context, GoogleMap map, ClusterManager<GalleryItem> clusterManager) {
             super(context, map, clusterManager);
         }
 
@@ -151,8 +148,9 @@ public class AsyncLoadMapGallery {
             clusterManager.setOnClusterClickListener(new ClusterManager.OnClusterClickListener<GalleryItem>() {
                 @Override
                 public boolean onClusterClick(Cluster<GalleryItem> cluster) {
-                    /**
-                     * Auch eine Idee: https://stackoverflow.com/questions/25395357/android-how-to-uncluster-on-single-tap-on-a-cluster-marker-maps-v2
+                    /*
+                     Auch eine Idee: https://stackoverflow.com/questions/25395357/android-how-to-uncluster-on-single-tap-on-a-cluster-marker-maps-v2
+
                      LatLngBounds.Builder builder = LatLngBounds.builder();
                      for (ClusterItem item : cluster.getItems()) {
                      builder.include(item.getPosition());
@@ -263,7 +261,6 @@ public class AsyncLoadMapGallery {
                         md5Collector.append("'");
                         md5Collector.append(md5);
                         md5Collector.append("', ");
-                        //todo care about aspect ratio
                         publishProgress(new GalleryItem(ll, mapIcon, i, resultFiles.length));
                     }
                 }
@@ -278,9 +275,7 @@ public class AsyncLoadMapGallery {
                     while (!cursor.isAfterLast()) {
                         String unusedMd5 = cursor.getString(cursor.getColumnIndex("filehash"));
                         File unusedFile = new File(imgCacheDir, unusedMd5 + ".png");
-                        if (!unusedFile.delete()) {
-                           // throw new IOException("Cannot delete " + unusedFile);
-                        }
+                        unusedFile.delete();
                         cursor.moveToNext();
                     }
                     cursor.close();

@@ -18,7 +18,6 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.enrico.gallery.galleryapp.albums.AlbumsUtils;
 import com.enrico.gallery.galleryapp.albums.AsyncLoadMapGallery;
 import com.enrico.gallery.galleryapp.settings.Preferences;
 import com.enrico.gallery.galleryapp.settings.SettingsActivity;
@@ -27,7 +26,6 @@ import com.enrico.gallery.galleryapp.utils.SDCardUtils;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.Marker;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 

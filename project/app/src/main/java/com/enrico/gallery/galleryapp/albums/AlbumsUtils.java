@@ -11,7 +11,6 @@ import android.support.v7.widget.RecyclerView;
 
 import com.enrico.gallery.galleryapp.MediaActivity;
 import com.enrico.gallery.galleryapp.settings.Preferences;
-import com.google.android.gms.maps.model.Marker;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -143,7 +142,7 @@ public class AlbumsUtils {
         markerPos = markers;
     }
 
-    public static void launchMediaActivity(final Activity activity, final AsyncLoadMapGallery.GalleryItem galleryItem) {
+    static void launchMediaActivity(final Activity activity, final AsyncLoadMapGallery.GalleryItem galleryItem) {
 
         Intent intent = new Intent(activity,
                 MediaActivity.class);
