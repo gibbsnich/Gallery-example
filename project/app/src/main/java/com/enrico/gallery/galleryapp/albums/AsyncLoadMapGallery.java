@@ -44,7 +44,7 @@ public class AsyncLoadMapGallery {
         new populateGallery(activity, googleMap, progressBar).execute();
     }
 
-    private static class GalleryItem implements ClusterItem  {
+    static class GalleryItem implements ClusterItem  {
         LatLng latLng;
         Bitmap bitmap;
         int cur, max;
