@@ -6,10 +6,7 @@ The app supports 5.0+ devices.
 
 Features:
 
-- Albums are shown in a recycler view with expandable sections;
-- Change columns number;
-- Hide folders (go to settings to make them visible again);
-- Bunch of themes;
+- Images with location data is shown on a map
 - Play videos and gifs;
 - Long click on media pager will show bottom sheet with infos and actions;
 - Crop, share, set as wallpaper or delete media;
@@ -29,13 +26,13 @@ Thanks!:)
 ![ScreenShot](https://raw.githubusercontent.com/enricocid/Gallery/master/art/screens4.png)
 
 
-You can download the latest (2.1) signed APK from this repo here: https://github.com/enricocid/Gallery/raw/master/project/app/app-release.apk
-
 
 
 
 
 **Credits:**
+
+- enricocid (https://github.com/enricocid) for his original work on this app
 
 - Ivan, my bro, for the support: https://github.com/ivn888
 
