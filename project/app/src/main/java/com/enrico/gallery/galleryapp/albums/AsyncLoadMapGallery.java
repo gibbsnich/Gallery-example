@@ -44,7 +44,7 @@ public class AsyncLoadMapGallery {
         new populateGallery(activity, googleMap, progressBar).execute();
     }
 
-    static class GalleryItem implements ClusterItem  {
+    static class GalleryItem implements ClusterItem {
         LatLng latLng;
         Bitmap bitmap;
         int cur, max;
@@ -169,6 +169,74 @@ public class AsyncLoadMapGallery {
 
         private final static int DEFAULT_IMG_SIZE = 800;
 
+        private Bitmap resizeAndCache(String imagePath, File cacheTargetFile) {
+            Bitmap imageBitmap = BitmapFactory.decodeFile(imagePath);
+            if (imageBitmap != null) {
+                int width = imageBitmap.getWidth(),
+                        height = imageBitmap.getHeight(),
+                        targetWidth, targetHeight;
+
+                if (width >= height) {
+                    targetWidth = (int)(DEFAULT_IMG_SIZE / density);
+                    targetHeight = (int)((DEFAULT_IMG_SIZE*((float)height/width)) / density);
+                } else {
+                    targetWidth = (int)((DEFAULT_IMG_SIZE*((float)width/height)) / density);
+                    targetHeight = (int)(DEFAULT_IMG_SIZE / density);
+                }
+
+                Bitmap resizedBitmap = Bitmap.createScaledBitmap(imageBitmap, targetWidth, targetHeight, false);
+                if (resizedBitmap != null) {
+                    FileOutputStream cacheImageStream = null;
+                    try {
+                        cacheImageStream = new FileOutputStream(cacheTargetFile);
+                        resizedBitmap.compress(Bitmap.CompressFormat.PNG, 100, cacheImageStream);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } finally {
+                        if (cacheImageStream != null) {
+                            try {
+                                cacheImageStream.flush();
+                                cacheImageStream.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                    return resizedBitmap;
+                }
+            }
+            return null;
+        }
+
+        private LatLng retrieveLatLng(SQLiteDatabase db, String filehash) {
+            Cursor cursor = db.rawQuery("SELECT * FROM galleryCache where filehash = '" + filehash + "';", null);
+            LatLng ll = null;
+            if (cursor != null && cursor.moveToFirst()) {
+                while (!cursor.isAfterLast()) {
+                    double lat = cursor.getDouble(cursor.getColumnIndex("lat")),
+                            lng = cursor.getDouble(cursor.getColumnIndex("lng"));
+                    ll = new LatLng(lat, lng);
+                    cursor.moveToNext();
+                }
+                cursor.close();
+            }
+            return ll;
+        }
+
+        private void cleanupCache(SQLiteDatabase db, String usedMd5, File cacheDir) {
+            Cursor cursor = db.rawQuery("SELECT filehash FROM galleryCache where filehash not in (" + usedMd5 + ");", null);
+            if (cursor != null && cursor.moveToFirst()) {
+                while (!cursor.isAfterLast()) {
+                    String unusedMd5 = cursor.getString(cursor.getColumnIndex("filehash"));
+                    File unusedFile = new File(cacheDir, unusedMd5 + ".png");
+                    unusedFile.delete();
+                    cursor.moveToNext();
+                }
+                cursor.close();
+            }
+            db.execSQL("delete from galleryCache where filehash not in (" + usedMd5 + ");");
+        }
+
         @Override
         protected Void doInBackground(Void... params) {
             //sucks, but go 2-way so we can tell the ProgressBar
@@ -189,75 +257,19 @@ public class AsyncLoadMapGallery {
                 StringBuilder md5Collector = new StringBuilder();
                 for (int i = 0; i < resultFiles.length; i++) {
                     String mediaPath = resultFiles[i];
-
                     String md5 = MD5.calculateMD5(new File(mediaPath));
-                    Cursor cursor = galleryDB.rawQuery("SELECT * FROM galleryCache where filehash = '" + md5 + "';", null);
-                    LatLng ll = null;
-                    if (cursor != null && cursor.moveToFirst()) {
-                        while (!cursor.isAfterLast()) {
-
-                            double lat = cursor.getDouble(cursor.getColumnIndex("lat")),
-                                    lng = cursor.getDouble(cursor.getColumnIndex("lng"));
-                            ll = new LatLng(lat, lng);
-
-                            cursor.moveToNext();
-                        }
-                        cursor.close();
-                    }
-
+                    LatLng ll = retrieveLatLng(galleryDB, md5);
                     if (ll == null) {
                         ll = getLatLng(mediaPath);
                         if (ll != null) {
                             galleryDB.execSQL("insert into galleryCache (filehash, lat, lng) values(?,?,?);", new Object[]{md5, ll.latitude, ll.longitude});
                         }
                     }
-
                     if (ll != null) {
-                        Bitmap mapIcon = null;
-
                         File cachedImageFile = new File(imgCacheDir, md5 + ".png");
-                        if (cachedImageFile.exists()) {
-                            mapIcon = BitmapFactory.decodeFile(cachedImageFile.getAbsolutePath());
-                        } else {
-                            Bitmap imageBitmap = BitmapFactory.decodeFile(mediaPath);
-                            if (imageBitmap != null) {
-                                int w = imageBitmap.getWidth(),
-                                    h = imageBitmap.getHeight(),
-                                    targetWidth, targetHeight;
-
-                                if (w >= h) {
-                                    h = (int)(DEFAULT_IMG_SIZE*((float)h/w));
-                                    targetWidth = (int)(DEFAULT_IMG_SIZE / density);
-                                    targetHeight = (int)(h / density);
-                                } else {
-                                    w = (int)(DEFAULT_IMG_SIZE*((float)w/h));
-                                    targetWidth = (int)(w / density);
-                                    targetHeight = (int)(DEFAULT_IMG_SIZE / density);
-                                }
-
-                                Bitmap resizedBitmap = Bitmap.createScaledBitmap(imageBitmap, targetWidth, targetHeight, false);
-                                if (resizedBitmap != null) {
-                                    FileOutputStream cacheImageStream = null;
-                                    try {
-                                        cacheImageStream = new FileOutputStream(cachedImageFile);
-                                        resizedBitmap.compress(Bitmap.CompressFormat.PNG, 100, cacheImageStream);
-                                    } catch (FileNotFoundException e) {
-                                        e.printStackTrace();
-                                    } finally {
-                                        if (cacheImageStream != null) {
-                                            try {
-                                                cacheImageStream.flush();
-                                                cacheImageStream.close();
-                                            } catch (IOException e) {
-                                                e.printStackTrace();
-                                            }
-                                        }
-
-                                    }
-                                    mapIcon = resizedBitmap;
-                                }
-                            }
-                        }
+                        Bitmap mapIcon = cachedImageFile.exists() ?
+                                BitmapFactory.decodeFile(cachedImageFile.getAbsolutePath()) :
+                                resizeAndCache(mediaPath, cachedImageFile);
                         md5Collector.append("'");
                         md5Collector.append(md5);
                         md5Collector.append("', ");
@@ -265,23 +277,8 @@ public class AsyncLoadMapGallery {
                     }
                 }
                 String usedMd5 = md5Collector.toString();
-                if (usedMd5.length() > 2)
-                    usedMd5 = usedMd5.substring(0, usedMd5.length() - 2);
-                else
-                    usedMd5 = "";
-
-                Cursor cursor = galleryDB.rawQuery("SELECT filehash FROM galleryCache where filehash not in (" + usedMd5 + ");", null);
-                if (cursor != null && cursor.moveToFirst()) {
-                    while (!cursor.isAfterLast()) {
-                        String unusedMd5 = cursor.getString(cursor.getColumnIndex("filehash"));
-                        File unusedFile = new File(imgCacheDir, unusedMd5 + ".png");
-                        unusedFile.delete();
-                        cursor.moveToNext();
-                    }
-                    cursor.close();
-                }
-
-                galleryDB.execSQL("delete from galleryCache where filehash not in ("+ usedMd5 +");");
+                usedMd5 = usedMd5.length() > 2 ? usedMd5.substring(0, usedMd5.length() - 2) : "";
+                cleanupCache(galleryDB, usedMd5, imgCacheDir);
             } finally {
                 if (galleryDB != null)
                     galleryDB.close();
