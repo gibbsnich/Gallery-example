@@ -23,18 +23,12 @@ Features:
 Thanks!:)
 
 
-![ScreenShot](https://raw.githubusercontent.com/enricocid/Gallery/master/art/screens4.png)
-
-
-
-
-
 
 **Credits:**
 
 - enricocid (https://github.com/enricocid) for his original work on this app
 
-- Ivan, my bro, for the support: https://github.com/ivn888
+- Ivan, enricocid's bro, for the support: https://github.com/ivn888
 
 - @RoySchutte (https://github.com/RoySchutte), for Dutch translations;
 
