@@ -35,7 +35,7 @@
             android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:context="com.enrico.gallery.galleryapp.MainActivity" />
+            tools:context="gibbs.mappedgallery.MainActivity" />
     </LinearLayout>
     <include layout="@layout/floating_plus" />
 

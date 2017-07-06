@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Gallery</string>
+    <string name="app_name">MappedGallery</string>
     <string name="settings">Options</string>
 
     <string name="pref_grid_title">Columns number</string>
