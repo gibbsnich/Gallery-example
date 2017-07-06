@@ -45,7 +45,7 @@ Thanks!:)
 
 **Resources used:**
 
-- AppCompat, RecyclerView, SupportPercent, Palette,Design by Google 
+- AppCompat, RecyclerView, SupportPercent, Palette, Design by Google, Google Maps
 https://developer.android.com/topic/libraries/support-library/packages.html
 
 - Glide by @bumtech
