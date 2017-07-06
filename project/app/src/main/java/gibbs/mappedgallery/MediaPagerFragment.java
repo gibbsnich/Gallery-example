@@ -18,8 +18,8 @@ import com.afollestad.easyvideoplayer.EasyVideoCallback;
 import com.afollestad.easyvideoplayer.EasyVideoPlayer;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import gibbs.mappedgallery.R;
 
+import gibbs.mappedgallery.albums.HeaderRecyclerViewSection;
 import gibbs.mappedgallery.utils.BottomSheetMediaActions;
 import gibbs.mappedgallery.utils.SaveTools;
 import com.github.chrisbanes.photoview.PhotoView;

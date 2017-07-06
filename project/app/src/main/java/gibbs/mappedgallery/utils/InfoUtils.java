@@ -12,7 +12,7 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import static gibbs.mappedgallery.HeaderRecyclerViewSection.stringContainsItemFromList;
+import static gibbs.mappedgallery.albums.HeaderRecyclerViewSection.stringContainsItemFromList;
 
 class InfoUtils {
 

@@ -1,4 +1,4 @@
-package gibbs.mappedgallery;
+package gibbs.mappedgallery.albums;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;

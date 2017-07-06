@@ -1,4 +1,4 @@
-package gibbs.mappedgallery;
+package gibbs.mappedgallery.albums;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -9,6 +9,7 @@ import android.provider.MediaStore;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
+import gibbs.mappedgallery.MediaActivity;
 import gibbs.mappedgallery.settings.Preferences;
 
 import java.io.File;

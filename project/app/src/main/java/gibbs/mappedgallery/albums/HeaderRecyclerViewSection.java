@@ -1,4 +1,4 @@
-package gibbs.mappedgallery;
+package gibbs.mappedgallery.albums;
 
 import android.app.Activity;
 import android.content.DialogInterface;
@@ -11,6 +11,9 @@ import android.view.View;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+
+import gibbs.mappedgallery.MediaActivity;
+import gibbs.mappedgallery.MediaObserver;
 import gibbs.mappedgallery.R;
 import gibbs.mappedgallery.utils.DeleteFileUtils;
 

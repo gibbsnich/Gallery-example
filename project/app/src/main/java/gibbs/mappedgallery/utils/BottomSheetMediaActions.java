@@ -16,7 +16,7 @@ import com.theartofdev.edmodo.cropper.CropImage;
 import java.io.File;
 import java.util.Locale;
 
-import static gibbs.mappedgallery.HeaderRecyclerViewSection.stringContainsItemFromList;
+import static gibbs.mappedgallery.albums.HeaderRecyclerViewSection.stringContainsItemFromList;
 
 public class BottomSheetMediaActions {
 

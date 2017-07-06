@@ -18,8 +18,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import gibbs.mappedgallery.R;
-
+import gibbs.mappedgallery.albums.AsyncLoadMapGallery;
 import gibbs.mappedgallery.settings.Preferences;
 import gibbs.mappedgallery.settings.SettingsActivity;
 import gibbs.mappedgallery.utils.PermissionUtils;

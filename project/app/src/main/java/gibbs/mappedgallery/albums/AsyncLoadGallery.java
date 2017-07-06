@@ -1,4 +1,4 @@
-package gibbs.mappedgallery;
+package gibbs.mappedgallery.albums;
 
 import android.app.Activity;
 import android.os.AsyncTask;

@@ -1,5 +1,4 @@
-package gibbs.mappedgallery;
-
+package gibbs.mappedgallery.albums;
 
 import java.io.File;
 
